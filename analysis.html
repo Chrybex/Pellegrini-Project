@@ -342,7 +342,7 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
   </table>
   <div class="callout blocker" style="margin-top:12px;margin-bottom:0">
     <div class="callout-title">⚠ Critical UX Risk</div>
-    <p>The Pellegrini integration would give Coverflex users a <strong>significantly worse experience</strong> than they have today. The churn risk from employees perceiving this as a step backward ("this is more complicated than before") is real and must be quantified before proceeding.</p>
+    <p>The Pellegrini integration may give Coverflex users a worse experience than they have today. The employee's perception as a step backward ("this is more complicated than before") should be quantified before proceeding.</p>
   </div>
 </div>
 
@@ -398,7 +398,7 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
         <tr><td>Instance</td><td><code>pellegrinib2ct.b2clogin.com</code></td><td><code>pellegrinib2c.b2clogin.com</code></td></tr>
         <tr><td>Domain</td><td><code>pellegrinib2ct.onmicrosoft.com</code></td><td><code>pellegrinib2c.onmicrosoft.com</code></td></tr>
         <tr><td>Policy</td><td><code>B2C_1A_NEWSIGNUP_SIGNIN</code></td><td><code>B2C_1A_NEWSIGNUP_SIGNIN</code></td></tr>
-        <tr><td>Client ID</td><td colspan="2" style="color:#f87171">REDACTED in documentation — immediate blocker</td></tr>
+        <tr><td>Client ID</td><td colspan="2" style="color:#f87171">TBD</td></tr>
       </tbody>
     </table>
   </div>
@@ -427,11 +427,11 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
   <table class="id-table">
     <thead><tr><th>Field</th><th>Coverflex</th><th>Pellegrini</th><th>Mapping Problem</th></tr></thead>
     <tbody>
-      <tr><td><strong>Primary ID</strong></td><td><code>user_id</code> (UUID)</td><td><code>Mail</code> (email address)</td><td>Which email? Work? Personal? What if work email changes?</td></tr>
+      <tr><td><strong>Primary ID</strong></td><td><code>user_id</code> (UUID)</td><td><code>Mail or user_id/code> (email address or user_id)</td><td>Which email? Work? Personal? What if work email changes?</td></tr>
       <tr><td><strong>Card / Token</strong></td><td>Visa PAN (tokenized)</td><td><code>Badge</code> (physical/digital card code)</td><td>1:1 mapping not guaranteed. Badge may not exist until VerificaERichiediCarta is called.</td></tr>
-      <tr><td><strong>Employee ID</strong></td><td>Not present</td><td><code>PomId</code> (Int — employee number)</td><td>Coverflex has no concept of employee number — must be provided and managed separately.</td></tr>
-      <tr><td><strong>Device</strong></td><td>Mobile device ID (internal)</td><td><code>IdDispositivo</code> (String — required for every API call)</td><td>Must generate a stable device fingerprint per user and pass it on each Pellegrini API call.</td></tr>
-      <tr><td><strong>Auth</strong></td><td>JWT / internal OAuth2</td><td>Azure AD B2C + ROPC User Token</td><td>Should Coverflex hold Pellegrini user credentials? Critical security risk.</td></tr>
+      <tr><td><strong>Employee ID</strong></td><td>Employee_ID</td><td><code>PomId</code> (Int — employee number)</td><td>Must be provided and managed separately.</td></tr>
+      <tr><td><strong>Device</strong></td><td>TBD</td><td><code>IdDispositivo</code> (String — required for every API call)</td><td>Must generate a stable device fingerprint per user and pass it on each Pellegrini API call.</td></tr>
+      <tr><td><strong>Auth</strong></td><td>JWT / internal OAuth2</td><td>Azure AD B2C</td><td>Should Coverflex hold Pellegrini user credentials? Critical security risk.</td></tr>
       <tr><td><strong>PIN</strong></td><td>No PIN for BP wallet</td><td><code>$$Pin</code> format — required for every SpendiBPE call</td><td>Who sets the PIN? How is it communicated to the user? Where is it stored? Format undocumented.</td></tr>
     </tbody>
   </table>
@@ -461,7 +461,7 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
       <div class="vflow-down orange"></div>
       <div class="node teal" style="width:100%;text-align:center">
         <div class="node-label">Coverflex stores mapping</div>
-        <div class="node-sub">Persists: coverflex_user_id ↔ mail + badge + pom_id + is_full_digital</div>
+        <div class="node-sub">Persists: coverflex_user_id ↔ pellegrini_user_id + mail + badge + pom_id + is_full_digital</div>
       </div>
     </div>
   </div>
@@ -511,7 +511,7 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
     <code>POST /SpendiBPE</code> requires a <code>ListaBuoni</code> — a list of actual vouchers that <strong>must physically exist on Pellegrini's servers</strong> for that user's Badge. Coverflex holds the user's BPE budget internally. Pellegrini has zero knowledge of it.
     <strong>Without pre-loading vouchers onto Pellegrini, SpendiBPE cannot be called and no CodiceSpesa can be generated.</strong>
     CodiceSpesa is not just an auth code — it is the materialisation of a verified Pellegrini-side balance. No Pellegrini balance = no code, regardless of what Coverflex holds.
-    <strong>This is the fundamental architectural blocker of the integration.</strong>
+    <strong>This is a fundamental architectural blocker of the integration.</strong>
   </p>
 </div>
 
@@ -558,7 +558,8 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
       <li>User enters Pellegrini PIN (format <code>$$Pin</code> — undocumented; likely physical card PIN or app PIN)
         <div class="q-badge">Is this the physical card PIN or an app-level PIN set by the user? Who sets it for virtual badges?</div>
       </li>
-      <li>Coverflex Backend calls <code>POST /SpendiBPE</code> with Mail + Badge + PomId + ListaBuoni + Pin + IdDispositivo</li>
+      <li>Coverflex Backend calls <code>POST /SpendiBPE</code> with Mail + Badge + PomId + ListaBuoni + Pin + IdDispositivo <div class="q-badge">Endpoint to get IdDispositivo (device_id) tbd</div></li> 
+
       <li>Pellegrini validates balance → returns <code>CodiceSpesa</code> (Decimal type, ~6 digits) + <code>SecondiRimanenti</code> (120s) + <code>Valore</code></li>
       <li>App displays CodiceSpesa prominently with 120-second countdown timer
         <div class="q-badge">Can the code be displayed as QR or barcode, or only as digits?</div>
@@ -573,14 +574,15 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
         <div class="q-badge">Does any POS support QR/barcode scanning of the code? Not documented.</div>
       </li>
       <li>POS calls a Pellegrini endpoint to validate the code
-        <div class="q-badge">Which endpoint does the POS call? Entirely absent from Pellegrini API documentation — critical gap.</div>
+        <div class="q-badge">Which endpoint does the POS call? Entirely absent from Pellegrini API documentation </div>
       </li>
       <li>Pellegrini validates code, deducts vouchers from user's Pellegrini balance, confirms amount to POS</li>
       <li>POS shows receipt: voucher portion settled, remaining amount paid by card/cash</li>
-      <li>Coverflex Backend polls <code>POST /GetMovimentiCarta</code> every ~30s for up to 5 minutes to detect transaction confirmation (no webhook available)
-        <div class="q-badge">How does Pellegrini notify Coverflex when a transaction completes? No webhook is documented.</div>
+      <li>Coverflex Backend polls <code>POST /GetMovimentiCarta</code> to detect transaction confirmation (no webhook available)
+        <div class="q-badge">How does Pellegrini notify Coverflex when a transaction completes and what's its payload? No webhook is documented.</div>
       </li>
-      <li>Coverflex marks transaction as USED, updates displayed balance in app</li>
+      <li>Coverflex marks transaction as USED, updates displayed balance in app  <div class="q-badge">How does Pellegrini notify Coverflex for reconciliation?</div>
+   </li>
     </ol>
     <div class="callout blocker" style="margin-top:12px;margin-bottom:0">
       <div class="callout-title">⚠ No Transactional Push Confirmation</div>
@@ -624,19 +626,17 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
     <tr><td>User interaction</td><td class="good">ZERO — just tap the card</td><td class="bad">Open app → enter PIN → generate code → show → cashier enters → wait for validation</td></tr>
     <tr><td>Technical paradigm</td><td>Card-based, ISO 8583, Visa network</td><td>Token-based, OTP, expiring numeric code</td></tr>
     <tr><td>Multi-wallet split</td><td class="good">Automatic: BP → Fringe Benefits → Wallet Credit</td><td class="bad">BPE only — no automatic split or fallback wallet</td></tr>
-    <tr><td>Acceptance network</td><td class="good">All Visa-enabled POS (meal_open_network) + GDO integrations</td><td class="bad">Pellegrini-contracted merchants only — structural gap for non-contracted Visa POS</td></tr>
+    <tr><td>Acceptance network</td><td class="good">All Visa-enabled POS (meal_open_network) + GDO integrations</td><td class="bad">Pellegrini-contracted merchants only</td></tr>
     <tr><td>Balance holder</td><td>Coverflex servers</td><td>Pellegrini servers — pre-loading required</td></tr>
-    <tr><td>Refund on BP</td><td>No refund on BP — by design</td><td>AnnullaCodiceSpesa if code unused; no refund after POS validation</td></tr>
     <tr><td>Offline payments</td><td class="good">Visa offline mode — works without internet</td><td class="bad">Requires internet for code generation — zero payments when offline</td></tr>
     <tr><td>Data sovereignty</td><td class="good">User data on Coverflex (EU) servers</td><td class="bad">User identity, balance, transactions on Pellegrini (competitor) servers</td></tr>
-    <tr><td>Competitor?</td><td>No</td><td class="bad">YES — Pellegrini is a direct competing BPE provider in Italy</td></tr>
   </tbody>
 </table>
 </div>
 
 <div class="callout insight">
-  <div class="callout-title">💡 Consequence of the Conflict</div>
-  <p>To use the Pellegrini API as-is, Coverflex would need to <strong>pre-load vouchers on Pellegrini for every user</strong> — paying Pellegrini upfront, managing reconciliation between two ledgers, handling a deprecated ROPC authentication flow, and storing user credentials for a competitor's system. This is not a technical integration challenge; it is a <strong>fundamental business model shift</strong> with significant security, compliance, and strategic implications.</p>
+  <div class="callout-title">💡 Consequence</div>
+  <p>To use the Pellegrini API as-is, Coverflex would need to <strong>pre-load vouchers on Pellegrini or its own systems (based on the model adopted) for every user</strong> — paying Pellegrini upfront, managing reconciliation between two ledgers, handling the authentication flow, and storing user credentials for a competitor's system.</p>
 </div>
 
 
@@ -653,10 +653,10 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
   <thead><tr><th>ID</th><th>Area</th><th>Gap Description</th><th>Severity</th><th>Required Action</th></tr></thead>
   <tbody>
     <tr><td style="color:#f0f6fc;font-weight:700">GT-01</td><td>Payment paradigm</td><td>Coverflex uses ISO 8583/Visa card; Pellegrini uses OTP/token. No native bridge — requires a completely new UX and backend flow.</td><td><span class="sev critical">CRITICAL</span></td><td>Fundamental architectural decision required</td></tr>
-    <tr><td style="color:#f0f6fc;font-weight:700">GT-02</td><td>User authentication</td><td>ROPC flow is deprecated (RFC 9700). Coverflex managing Pellegrini user credentials (email+password) is a critical security risk with no good solution.</td><td><span class="sev critical">CRITICAL</span></td><td>Ask Pellegrini for Auth Code + PKCE or app-level token for SpendiBPE</td></tr>
+    <tr><td style="color:#f0f6fc;font-weight:700">GT-02</td><td>User authentication</td><td>potentially obtaining and managing Pellegrini user tokens</td><td><span class="sev critical">CRITICAL</span></td><td>Ask Pellegrini for app-level token for SpendiBPE?</td></tr>
     <tr><td style="color:#f0f6fc;font-weight:700">GT-03</td><td>PIN format</td><td><code>$$Pin</code> format in SpendiBPE is completely undocumented — unclear if literal prefix, placeholder, or encoding. Cannot implement SpendiBPE correctly without clarification.</td><td><span class="sev critical">CRITICAL</span></td><td>Urgent DIT clarification before any implementation</td></tr>
     <tr><td style="color:#f0f6fc;font-weight:700">GT-04</td><td>Empty API sections</td><td>Sections 3.3 (TrackingOrdine), 3.4 (TrackingSpedizioni), 4.1 (logBadge) are completely empty — unknown functionality, could be critical for order management.</td><td><span class="sev high">HIGH</span></td><td>Request complete documentation from DIT urgently</td></tr>
-    <tr><td style="color:#f0f6fc;font-weight:700">GT-05</td><td>120s CodiceSpesa window</td><td>Very tight UX constraint — user must generate code, reach checkout, and complete payment in &lt;2 minutes. Race condition risk on slow networks or busy POS queues.</td><td><span class="sev high">HIGH</span></td><td>Latency testing required; ask if window is configurable</td></tr>
+    <tr><td style="color:#f0f6fc;font-weight:700">GT-05</td><td>120s CodiceSpesa window</td><td>User must generate code, reach checkout, and complete payment in &lt;2 minutes. Race condition risk on slow networks or busy POS queues.</td><td><span class="sev high">HIGH</span></td><td>Latency testing required; ask if window is configurable</td></tr>
     <tr><td style="color:#f0f6fc;font-weight:700">GT-06</td><td>User identity mapping</td><td>Coverflex user_id ≠ Pellegrini Mail + PomId. No PomId concept in Coverflex. Badge may not exist. Complex sync process needed.</td><td><span class="sev high">HIGH</span></td><td>Define identity mapping schema + onboarding sync strategy</td></tr>
     <tr><td style="color:#f0f6fc;font-weight:700">GT-07</td><td>No BP refund in Coverflex</td><td>If SpendiBPE is used but the order is later cancelled, how is the BPE credit managed? Coverflex cannot refund BP wallet by design.</td><td><span class="sev high">HIGH</span></td><td>Business rule to define with Legal and Product</td></tr>
     <tr><td style="color:#f0f6fc;font-weight:700">GT-08</td><td>No transaction webhook</td><td>Pellegrini provides no webhook. Coverflex cannot know in real time if CodiceSpesa was used. Only option: poll GetMovimentiCarta (latent, fragile).</td><td><span class="sev high">HIGH</span></td><td>Ask DIT if webhook/callback is available or planned</td></tr>
@@ -770,14 +770,8 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
       <tr><td>GDO supermarkets (Coop, Carrefour)</td><td class="good">Yes — via GDO integrations (Argentea, etc.)</td><td>Yes — via own GDO network</td><td>High overlap but different technical mechanisms</td></tr>
       <tr><td>Corporate canteens / caterers</td><td class="good">Yes — meal_integration pipeline</td><td>Yes — Pellegrini's core market</td><td>High overlap — core business for both</td></tr>
       <tr><td>Non-contracted Visa POS</td><td class="good">YES — any Visa POS (meal_open_network)</td><td class="bad">NO — contracted network only</td><td><strong>ZERO overlap — structural coverage gap</strong></td></tr>
-      <tr><td>Pharmacies (Fringe wallet)</td><td class="good">Yes — Fringe wallet, not BP</td><td class="bad">Not applicable — BPE only</td><td>No impact for BPE; but multi-wallet fallback lost</td></tr>
     </tbody>
   </table>
-  <div class="callout warning" style="margin-top:10px;margin-bottom:0">
-    <div class="callout-title">⚠ Coverage Regression Risk</div>
-    <p>The most important gap: Coverflex today accepts BPE payments at <strong>ANY Visa POS</strong> via the <code>meal_open_network</code> pipeline. Pellegrini only accepts at contracted merchants. If a Coverflex user uses the Pellegrini integration for some payments, <strong>they lose BP coverage at all merchants that are Visa-enabled but not Pellegrini-contracted</strong>. This is a product regression that must be communicated clearly to users and management before any rollout decision.</p>
-  </div>
-</div>
 
 
 <!-- ── SECTION 10: COMPLIANCE & LEGAL ────────────────────────────────────── -->
@@ -793,9 +787,6 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
     <tr><td><strong>MIMIT Authorization (BPE Issuer)</strong></td><td>Has authorization (or operates under EU freedom of establishment)</td><td>Has Italian MIMIT authorization as BPE provider</td><td><strong>Does distributing Pellegrini BPE require a separate MIMIT authorization for Coverflex? Law 193/2024 context.</strong></td></tr>
     <tr><td><strong>Law 193/2024 — 5% Commission Cap</strong></td><td>Coverflex must respect the 5% cap on BPE commissions</td><td>Pellegrini must respect the cap</td><td>How is the cap shared between two operators in the distribution chain? Who reports to MIMIT?</td></tr>
     <tr><td><strong>GDPR — User Data</strong></td><td>User data on EU servers (Coverflex)</td><td>User identity, balance, transactions on Pellegrini servers</td><td>Data Processing Agreement (DPA) required with Pellegrini. Must users be informed their data flows to a third party? Right to erasure across both systems?</td></tr>
-    <tr><td><strong>AGCM — Competition</strong></td><td>Coverflex is an injured party in the Edenred AGCM investigation</td><td>Pellegrini is a competitor — not under investigation</td><td>Integration with a direct competitor could create an unwanted strategic dependency and reduce Coverflex's competitive leverage in regulatory contexts.</td></tr>
-    <tr><td><strong>PSD2 / Strong Customer Auth</strong></td><td>SCA handled by Paymentology / Visa</td><td>SCA handled by Azure AD B2C</td><td>How is SCA guaranteed in the Pellegrini spend flow when mediated by Coverflex? ROPC eliminates SCA-equivalent protections.</td></tr>
-    <tr><td><strong>OAuth2 Security (RFC 9700)</strong></td><td>Uses standard OAuth2 with internal providers</td><td>ROPC flow — deprecated and security-non-compliant</td><td>Using deprecated ROPC to manage user credentials may create liability exposure in case of security incident.</td></tr>
   </tbody>
 </table>
 
@@ -814,7 +805,6 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#0d1117;borde
       <li>Does Pellegrini support a B2B partner integration model where Coverflex can authorise BPE spend without individual user Badges and without ROPC?</li>
       <li>Is Pellegrini open to BIN acceptance — recognising Coverflex Visa cards as valid BPE at their POS network?</li>
       <li>Is there a mechanism (API or batch) to load BPE vouchers onto a user's Pellegrini balance from an external platform?</li>
-      <li>Can Pellegrini provide an Authorization Code + PKCE flow instead of ROPC for User Token generation?</li>
       <li>Does a virtual badge with <code>isFullDigital: true</code> allow provisioning without any physical card step, entirely via API?</li>
       <li>If Coverflex pre-funds Pellegrini (buying vouchers in bulk), what is the reconciliation and refund model?</li>
     </ul>
