@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pellegrini Integration — Open Questions v2</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0d1117;color:#f0f6fc;min-height:100vh;padding:28px 24px 72px;max-width:1100px;margin:0 auto}
+h1{font-size:22px;font-weight:800;color:#f0f6fc}
+h2{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+h3{font-size:12px;font-weight:700;color:#8b949e;letter-spacing:.6px;text-transform:uppercase;margin:20px 0 10px}
+p,li{font-size:12px;line-height:1.65;color:#c9d1d9}
+code{font-family:'Courier New',monospace;font-size:11px;background:#161b22;border:1px solid #30363d;padding:1px 5px;border-radius:3px;color:#f0f6fc;white-space:nowrap}
+
+/* HEADER */
+.page-header{margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #fb923c}
+.page-header .sub{font-size:12px;color:#8b949e;margin-top:5px}
+.page-header .meta{font-size:11px;color:#6e7681;margin-top:3px}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+.stat{background:#161b22;border:1.5px solid #30363d;border-radius:8px;padding:10px 14px}
+.stat-num{font-size:22px;font-weight:800;color:#f0f6fc;display:block}
+.stat-label{font-size:11px;color:#8b949e;margin-top:2px}
+.stat.ext{border-color:#fb923c55}.stat.ext .stat-num{color:#fb923c}
+.stat.eng{border-color:#38bdf855}.stat.eng .stat-num{color:#38bdf8}
+.stat.com{border-color:#4ade8055}.stat.com .stat-num{color:#4ade80}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;gap:10px;margin:28px 0 6px}
+.section-badge{padding:3px 10px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.section-badge.ext{background:#431407;color:#fb923c;border:1px solid #fb923c55}
+.section-badge.eng{background:#0c4a6e33;color:#38bdf8;border:1px solid #38bdf855}
+.section-badge.com{background:#14532d33;color:#4ade80;border:1px solid #4ade8055}
+.section-line{flex:1;height:1px;background:#21262d}
+.section-title{font-size:17px;font-weight:800;color:#f0f6fc;margin-bottom:4px;margin-top:12px}
+.section-desc{font-size:12px;color:#8b949e;margin-bottom:16px;line-height:1.6}
+
+/* CATEGORY */
+.cat-label{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#6e7681;margin:16px 0 8px;padding-left:4px;border-left:3px solid #30363d}
+
+/* QUESTION CARD */
+.q-card{background:#161b22;border-radius:8px;margin-bottom:8px;display:flex;overflow:hidden}
+.q-accent{width:4px;flex-shrink:0}
+.q-accent.ext{background:#fb923c}
+.q-accent.eng{background:#38bdf8}
+.q-accent.com{background:#4ade80}
+.q-body{padding:10px 14px;flex:1}
+.q-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:5px}
+.q-num{font-size:10px;font-weight:800;color:#6e7681;background:#21262d;border-radius:4px;padding:2px 6px;flex-shrink:0;margin-top:1px;white-space:nowrap}
+.q-text{font-size:12.5px;font-weight:700;color:#f0f6fc;line-height:1.5}
+.q-note{font-size:11px;color:#8b949e;line-height:1.55;margin-top:5px;padding-left:2px}
+.q-note strong{color:#c9d1d9}
+.q-note em{color:#6e7681;font-style:italic}
+.q-note li{font-size:11px;color:#8b949e;margin-bottom:2px;margin-left:14px;list-style:disc}
+
+/* PRIORITY TAG */
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;margin-left:4px;vertical-align:middle;flex-shrink:0;margin-top:2px}
+.tag.critical{background:#450a0a;color:#f43f5e;border:1px solid #f43f5e55}
+.tag.high{background:#431407;color:#fb923c;border:1px solid #fb923c55}
+.tag.medium{background:#1c2a1c;color:#86efac;border:1px solid #4ade8055}
+.tag.new{background:#1e1b4b;color:#818cf8;border:1px solid #818cf855}
+
+/* INTRO BOX */
+.intro-box{background:#161b22;border:1.5px solid #30363d;border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:12px;line-height:1.7;color:#c9d1d9}
+.intro-box strong{color:#f0f6fc}
+
+/* FOOTER */
+.page-footer{margin-top:40px;padding-top:14px;border-top:1px solid #21262d;font-size:11px;color:#6e7681;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <h1>Pellegrini Integration</h1>
+  <div class="sub">Open Questions — External, Engineering &amp; Commercial</div>
+  <div class="meta">Welfare Pellegrini / DIT · Coverflex Internal · May 2026 · PRELIMINARY v2</div>
+</div>
+
+<!-- INTRO -->
+<div class="intro-box">
+  This document collects all open questions arising from the preliminary analysis of the Pellegrini API v1.0, the Bible Architectural Analysis, and the Integration Architecture Report. It is structured in three sections: <strong>External</strong> questions to be submitted to the Pellegrini / DIT team, <strong>Engineering</strong> questions for internal technical alignment, and <strong>Commercial &amp; Product</strong> questions for business and go-to-market decisions. Questions are ordered by priority within each subsection. None of the architectural or commercial decisions described here are final — this document is a working input for the evaluation phase.
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat"><span class="stat-num">52</span><span class="stat-label">Total questions</span></div>
+  <div class="stat ext"><span class="stat-num">24</span><span class="stat-label">For Pellegrini / DIT</span></div>
+  <div class="stat eng"><span class="stat-num">16</span><span class="stat-label">For Engineering</span></div>
+  <div class="stat com"><span class="stat-num">12</span><span class="stat-label">For Commercial / Product</span></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1 — EXTERNAL -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-badge ext">External</div>
+  <div class="section-line"></div>
+</div>
+<div class="section-title">Section 1 — Questions for Pellegrini / DIT</div>
+<div class="section-desc">These questions must be formally submitted to the DIT / Pellegrini technical team before any integration work can begin. Several are hard blockers — highlighted in the notes.</div>
+
+<div class="cat-label">API &amp; Technical Gaps</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q01</span><span class="tag critical">Critical</span><span class="q-text">What endpoint does the POS terminal call to validate a CodiceSpesa? What is the full request/response schema?</span></div>
+    <div class="q-note"><em>The POS-side validation flow is completely absent from Pellegrini API v1.0 documentation — without this, the end-to-end payment flow cannot be fully designed.</em><br>Expected details: endpoint name, HTTP method, auth mechanism, error codes, timeout behaviour.</div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q02</span><span class="tag critical">Critical</span><span class="q-text">Is there a mechanism to credit / load BPE vouchers into a user's Pellegrini wallet from an external platform?</span></div>
+    <div class="q-note"><em>Fundamental integration prerequisite: Coverflex holds the user BPE budget — how does it transfer or fund the Pellegrini-side balance?</em>
+      <ul>
+        <li>Is there an endpoint such as <code>/AccreditaBuoni</code>, <code>/CaricaSaldo</code>, or similar?</li>
+        <li>Or is the budget loaded at the time of order creation (<code>CreaOrdine</code>)?</li>
+        <li>Or is there a batch / financial reconciliation process entirely separate from this API?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q03</span><span class="tag high">High</span><span class="q-text">Does the Pellegrini API support webhooks or push notifications to inform third-party backends when a POS transaction completes?</span></div>
+    <div class="q-note"><em>Without webhooks, third-party integrations must poll <code>GetMovimentiCarta</code> — which introduces latency and is inefficient at scale.</em><br>If webhooks exist: what events are emitted, what is the payload schema, and how is the endpoint registered?</div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q04</span><span class="tag high">High</span><span class="q-text">Which endpoints require a User Token, and which can operate with an App Token (client_credentials)? Specifically: can <code>POST /SpendiBPE</code> be called with an App Token?</span><span class="tag new">New</span></div>
+    <div class="q-note"><em>The API documentation does not explicitly classify endpoints as AppOnly or UserOrApp. The token type required for SpendiBPE has major architectural implications and must be clarified before integration design can begin.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q05</span><span class="tag high">High</span><span class="q-text">For partner / institutional integrations, what OAuth2 flow does Pellegrini recommend to obtain a User Token? Is there a dedicated flow that does not require handling individual user credentials?</span><span class="tag new">New</span></div>
+    <div class="q-note"><em>The API documentation (§1.3) mentions Authorization Code or ROPC as options, without specifying which applies to partner scenarios. The choice of flow has direct implications for security posture, UX model, and credential handling — this needs to be explicitly scoped with Pellegrini / DIT.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q06</span><span class="tag high">High</span><span class="q-text">In <code>POST /SpendiBPE</code>, is 'Pin' the physical card PIN or an app-level PIN set by the user inside the Pellegrini app? Who sets it for virtual / digital badges?</span></div>
+    <div class="q-note"><em>The documentation states '<code>$$$Pin</code>' format — the triple-dollar prefix is never explained anywhere.</em><br>This affects UX design significantly: card PIN requires the user to remember a banking credential; app PIN is a simpler code set at onboarding.</div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q07</span><span class="tag high">High</span><span class="q-text">What is the User Token expiry? Is there a token refresh or silent re-authentication mechanism documented?</span></div>
+    <div class="q-note"><em>Token expiry is not documented. No token refresh or silent re-authentication flow is described in the API documentation — this affects session management design.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q08</span><span class="tag high">High</span><span class="q-text">For employees with <code>isFullDigital: true</code> badges — does the onboarding flow skip physical card issuance (<code>CreaOrdine</code>, <code>AttivaCarta</code>) entirely?</span></div>
+    <div class="q-note"><em>If virtual badges are available without a physical card, this significantly simplifies the onboarding path.</em><br>Specifically: does a fully digital badge still require Pellegrini-side BPE balance to exist before spend, or does it work differently?</div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q09</span><span class="tag medium">Medium</span><span class="q-text">Why is <code>CodiceSpesa</code> typed as 'decimal' in the <code>/SpendiBPE</code> response? Is it safe to treat it as integer or string?</span></div>
+    <div class="q-note"><em>A spend code used for POS validation should logically be an integer or string — decimal typing is anomalous.</em><br>Does the spend code ever contain decimal places? Or is 'decimal' just a documentation choice?</div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q10</span><span class="tag medium">Medium</span><span class="q-text">Is the 'Badge' field truly mandatory in <code>POST /SpendiBPE</code>, or can Pellegrini resolve it internally from 'Mail'?</span></div>
+    <div class="q-note"><em><code>GetSaldo</code> already resolves <code>Mail → Badge</code> server-side. If Badge can be omitted in SpendiBPE, the client needs to cache less data.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q11</span><span class="tag medium">Medium</span><span class="q-text">What is the 'Provenienza' field in <code>POST /SpendiBPE</code>? What are the valid values and when is it required?</span></div>
+    <div class="q-note"><em>This field appears in payload examples but is absent from the parameter table — its purpose is undocumented.</em><br>Observed value in examples: <code>"APP"</code>. Are other values valid (e.g. <code>"WEB"</code>, <code>"POS"</code>)?</div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q12</span><span class="tag medium">Medium</span><span class="q-text">How can a caller distinguish 'card just created' from 'card already exists' in the <code>POST /VerificaERichiediCarta</code> response?</span></div>
+    <div class="q-note"><em>Both cases currently return the identical message <code>'Carta Richiesta'</code> — there is no differentiation in the documented response.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q13</span><span class="tag medium">Medium</span><span class="q-text">How long after <code>POST /VerificaERichiediCarta</code> does the badge become available and usable via the API?</span></div>
+    <div class="q-note"><em>Timing is undocumented. A third-party integrator needs to know whether to poll, wait a fixed interval, or use a different signal to confirm badge readiness.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q14</span><span class="tag medium">Medium</span><span class="q-text">Can a user have multiple active badges simultaneously? If so, how should an integrating application decide which badge to use in <code>POST /SpendiBPE</code>?</span></div>
+    <div class="q-note"><em>Not addressed in the documentation — relevant for users who may have both physical and digital badges active.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q15</span><span class="tag medium">Medium</span><span class="q-text">What are endpoints <code>TrackingOrdine</code>, <code>TrackingSpedizioni</code>, and <code>logBadge</code>? When will they be documented?</span></div>
+    <div class="q-note"><em>Three of the endpoints listed in the API have completely empty sections in Pellegrini API v1.0 documentation.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q16</span><span class="tag medium">Medium</span><span class="q-text">Is there a complete API error code catalog with descriptions and recommended handling?</span></div>
+    <div class="q-note"><em>The documentation does not include any error codes or error response schemas.</em><br>Expected: HTTP status codes, application-level error codes, descriptions, and retry guidance.</div>
+  </div>
+</div>
+
+<div class="cat-label">Integration Model &amp; Partnership</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q17</span><span class="tag high">High</span><span class="q-text">Is Pellegrini API v1.0 intended for direct partner integration, or does a separate B2B / partner integration guide exist alongside the consumer-facing API?</span></div>
+    <div class="q-note"><em>The current documentation appears to describe the API as used by Pellegrini's native app. It is unclear whether the same API surface, authentication flows, and data models are appropriate for institutional partner use cases — or whether a separate specification exists.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q18</span><span class="tag high">High</span><span class="q-text">Is there a sandbox / staging environment available for integration testing?</span></div>
+    <div class="q-note"><em>No sandbox is mentioned anywhere in the documentation. End-to-end testing without one requires either a mock or a limited live pilot — both with significant operational risk.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q19</span><span class="tag high">High</span><span class="q-text">Can you provide the Azure B2C Client ID and Client Secret (currently redacted in the documentation) for sandbox / test environment setup?</span></div>
+    <div class="q-note"><em>Without these credentials it is impossible to obtain any token, test any endpoint, or begin development — this is a prerequisite for any technical work.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q20</span><span class="tag medium">Medium</span><span class="q-text">Are there rate limits, throttling policies, or usage quotas on the Pellegrini API?</span></div>
+    <div class="q-note"><em>Not documented. Relevant for polling strategies and batch operations at scale.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q21</span><span class="tag medium">Medium</span><span class="q-text">What are the SLA terms — uptime guarantee, planned maintenance windows, and incident response time?</span></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q22</span><span class="tag medium">Medium</span><span class="q-text">Who is the technical point of contact for integration support and issue escalation?</span></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q23</span><span class="tag medium">Medium</span><span class="q-text">What is the data ownership model? Under GDPR, who is the data controller for user personal data stored in the Pellegrini system?</span></div>
+    <div class="q-note"><em>Pellegrini stores email, fiscal code, badge data, and transaction history for Coverflex users. The controller/processor relationship and data retention policies need to be formally defined.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent ext"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q24</span><span class="tag medium">Medium</span><span class="q-text">Are there any contractual exclusivity clauses that would prevent Coverflex from also integrating with other competing welfare networks?</span></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2 — ENGINEERING -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-badge eng">Engineering</div>
+  <div class="section-line"></div>
+</div>
+<div class="section-title">Section 2 — Internal Engineering Questions</div>
+<div class="section-desc">These are design and feasibility questions for the Coverflex engineering team. Some depend on answers from Pellegrini — flagged in the context notes.</div>
+
+<div class="cat-label">Architecture Decisions</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q25</span><span class="tag high">High</span><span class="q-text">Should Coverflex act as a full proxy (APP → Coverflex Backend → Pellegrini) or allow the APP to call Pellegrini directly for certain flows?</span></div>
+    <div class="q-note"><em>A full proxy (all calls routed through the Coverflex Backend) centralises auth and logging but adds latency. Direct APP-to-Pellegrini calls reduce hops but expose Pellegrini tokens to the client. The tradeoffs need to be explicitly scoped — particularly in light of the open questions around token type and credential handling (Q04, Q05).</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q26</span><span class="tag high">High</span><span class="q-text">When and how do we sync / credit the user's BPE budget from Coverflex to Pellegrini's servers?</span></div>
+    <div class="q-note"><em>This is the most critical architectural unknown — depends on the answer to Q02. Options to evaluate:
+      <ul>
+        <li>Batch top-up: Coverflex credits Pellegrini at the start of each benefit period</li>
+        <li>On-demand: Coverflex credits Pellegrini the moment the user tries to spend</li>
+        <li>Order-time: <code>CreaOrdine</code> already provisions the budget (needs DIT confirmation)</li>
+      </ul>
+    </em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q27</span><span class="tag high">High</span><span class="q-text">How do we handle the auth flow and credential / token lifecycle for obtaining User Tokens on behalf of Pellegrini users?</span></div>
+    <div class="q-note"><em>Depends heavily on the answer to Q04 and Q05. The implications of each possible flow (Auth Code, ROPC, or App Token if allowed) span security posture, UX model at spend time, token storage, refresh strategy, and session management. These tradeoffs need to be explicitly mapped before any implementation decision is made.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q28</span><span class="tag medium">Medium</span><span class="q-text">Where do we store <code>PomId</code> and <code>Badge</code> for each user — resolved once at onboarding and persisted, or fetched fresh on each session?</span></div>
+    <div class="q-note"><em><code>PomId</code> is stable per employee. <code>Badge</code> can expire (<code>dataScadenzaBancaria</code>). Caching strategy must account for badge expiry and renewal.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q29</span><span class="tag medium">Medium</span><span class="q-text">How do we handle the Pellegrini App Token (<code>client_credentials</code>) lifecycle — generate per-request, cache with TTL, or long-lived?</span></div>
+    <div class="q-note"><em>Token expires in 3600s. A token manager service on the Coverflex Backend should handle renewal transparently — approach and failure handling need to be designed.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q30</span><span class="tag medium">Medium</span><span class="q-text">Without a Pellegrini webhook, what is our polling strategy for post-spend balance updates?</span></div>
+    <div class="q-note"><em>Options to evaluate:
+      <ul>
+        <li>Poll immediately after spend code generation</li>
+        <li>Poll on next app open</li>
+        <li>Push a local optimistic update and reconcile later</li>
+      </ul>
+    </em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q31</span><span class="tag medium">Medium</span><span class="q-text">How do we handle concurrent spend code generation — e.g. user opens the app on two devices simultaneously?</span></div>
+    <div class="q-note"><em>Pellegrini may or may not prevent duplicate active codes. A locking or deduplication strategy on the Coverflex side needs to be defined.</em></div>
+  </div>
+</div>
+
+<div class="cat-label">Security &amp; Data</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q32</span><span class="tag high">High</span><span class="q-text">If User Tokens are involved in the integration, how do we prevent them from being exposed to the client-side app?</span></div>
+    <div class="q-note"><em>Depends on the resolution of Q04/Q05. The token handling strategy — where tokens are stored, how they transit, and who can access them — needs to be explicitly scoped as part of the security design.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q33</span><span class="tag high">High</span><span class="q-text">How do we handle the PIN in the <code>SpendiBPE</code> flow — does it transit through Coverflex Backend or is it sent directly from the APP to Pellegrini?</span></div>
+    <div class="q-note"><em>The two paths have different security profiles. Transmitting a PIN through a proxy adds intermediary exposure risk; a direct app-to-Pellegrini call reduces it but may conflict with the proxy architecture. The choice has implications for security responsibility and integration model.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q34</span><span class="tag medium">Medium</span><span class="q-text">What data minimisation policy do we apply to Pellegrini user data (fiscal code, badge number, transaction history) stored on Coverflex servers?</span></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q35</span><span class="tag medium">Medium</span><span class="q-text">How do we handle GDPR right-to-erasure requests for users who have data in both Coverflex and Pellegrini systems?</span></div>
+  </div>
+</div>
+
+<div class="cat-label">Implementation &amp; Testing</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q36</span><span class="tag high">High</span><span class="q-text">Without a Pellegrini sandbox environment, how do we test the integration before going live?</span></div>
+    <div class="q-note"><em>Options to evaluate: request a sandbox from DIT, build a Pellegrini API mock based on the documentation, or negotiate a limited live test with a pilot employer.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q37</span><span class="tag medium">Medium</span><span class="q-text">How do we handle the three undocumented endpoints (<code>TrackingOrdine</code>, <code>TrackingSpedizioni</code>, <code>logBadge</code>) — skip, stub, or block on DIT to provide documentation?</span></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q38</span><span class="tag medium">Medium</span><span class="q-text">What is our error handling strategy for Pellegrini API failures mid-spend-flow?</span></div>
+    <div class="q-note"><em>e.g. <code>SpendiBPE</code> succeeds but the 120s window expires before POS confirmation — who resolves the inconsistency, and what is the user-facing response?</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q39</span><span class="tag medium">Medium</span><span class="q-text">Do we need to build a Pellegrini balance reconciliation job to ensure Coverflex and Pellegrini balances stay in sync?</span></div>
+    <div class="q-note"><em>If balances can drift (e.g. due to a failed sync or a missed transaction event), a reconciliation process is needed to detect and resolve discrepancies.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent eng"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q40</span><span class="tag medium">Medium</span><span class="q-text">What observability do we need on Pellegrini API calls — logging, tracing, alerting on error rates?</span></div>
+    <div class="q-note"><em>Given Pellegrini API is a third-party dependency with unknown reliability, circuit breakers and fallback UX strategies for when it is unavailable need to be scoped.</em></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3 — COMMERCIAL & PRODUCT -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="section-header">
+  <div class="section-badge com">Commercial · Product</div>
+  <div class="section-line"></div>
+</div>
+<div class="section-title">Section 3 — Commercial &amp; Product Questions</div>
+<div class="section-desc">These are for the commercial, product, and go-to-market teams. They define constraints and assumptions that directly influence the technical design.</div>
+
+<div class="cat-label">Business Model &amp; Feasibility</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q41</span><span class="tag high">High</span><span class="q-text">Is Coverflex willing to issue physical Pellegrini cards to Coverflex users, or must we pursue a fully digital (<code>isFullDigital</code>) path?</span></div>
+    <div class="q-note"><em>Physical card issuance adds onboarding friction, shipping lead time, and cost. <code>isFullDigital</code> may not be available for all use cases — needs DIT confirmation (Q08).</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q42</span><span class="tag high">High</span><span class="q-text">How does the parallel BPE ledger work — if Pellegrini holds the operational balance, does Coverflex maintain a shadow ledger?</span></div>
+    <div class="q-note"><em>If the user's Pellegrini balance drifts from Coverflex's record (e.g. a failed sync), who is the source of truth and what is the user-facing resolution?</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q43</span><span class="tag high">High</span><span class="q-text">What are the commercial terms with Pellegrini — does Coverflex pay a per-user fee, a per-transaction fee, or a fixed annual fee?</span></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q44</span><span class="tag medium">Medium</span><span class="q-text">Which employers are in scope for the first pilot? What is the minimum viable rollout size to validate the integration?</span></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q45</span><span class="tag medium">Medium</span><span class="q-text">Are there Italian welfare regulation constraints (MIMIT authorisation, Law 193/2024) that affect how BPE vouchers are handled when routed through a third-party platform like Coverflex?</span></div>
+    <div class="q-note"><em>Fringe benefit tax treatment and compliance requirements may differ when an intermediary is involved. Law 193/2024 caps BPE commissions at 5% — the implications for a dual-operator chain need to be assessed.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q46</span><span class="tag medium">Medium</span><span class="q-text">What happens to the user's Pellegrini wallet when they leave a company — is the balance managed and returned by Coverflex, or by Pellegrini directly?</span></div>
+  </div>
+</div>
+
+<div class="cat-label">Product &amp; UX</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q47</span><span class="tag high">High</span><span class="q-text">What is the acceptable onboarding flow length for a Coverflex user activating Pellegrini benefits?</span></div>
+    <div class="q-note"><em>The current documented onboarding involves card issuance, shipping, and physical activation — potentially weeks of friction before first use. A fully digital path needs to be confirmed as viable.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q48</span><span class="tag high">High</span><span class="q-text">How do we communicate the 120-second spend code window to the user in the Coverflex app UX?</span></div>
+    <div class="q-note"><em>120 seconds is tight — especially if the POS queue is long. Is there a way to regenerate codes rapidly if the first expires? Can the code be displayed as a QR or barcode, or only as digits?</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q49</span><span class="tag medium">Medium</span><span class="q-text">How do we communicate the merchant network coverage difference to users — Coverflex today covers any Visa POS, Pellegrini covers only contracted merchants?</span></div>
+    <div class="q-note"><em>For users who currently use BPE at non-contracted merchants (via the Coverflex Visa card), integration with Pellegrini's network could represent a coverage reduction. This needs to be surfaced and scoped before rollout.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q50</span><span class="tag medium">Medium</span><span class="q-text">Do we need to educate Coverflex users on the split payment model — that only the voucher amount is paid via Pellegrini, with the remainder by card / cash?</span></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q51</span><span class="tag medium">Medium</span><span class="q-text">If a spend code fails at the POS (expired, validation error, network issue) — who handles user support, Coverflex or Pellegrini?</span></div>
+    <div class="q-note"><em>Clear responsibility assignment is needed before launch — user-facing failures at the POS are high-stress situations requiring a defined escalation path.</em></div>
+  </div>
+</div>
+
+<div class="q-card">
+  <div class="q-accent com"></div>
+  <div class="q-body">
+    <div class="q-top"><span class="q-num">Q52</span><span class="tag medium">Medium</span><span class="q-text">Who is responsible for triggering company onboarding (<code>CreaCliente</code>) — is this automated by Coverflex or a manual step requiring employer input?</span></div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<div class="page-footer">
+  <strong>Document status:</strong> Draft v2 — for internal review only · Coverflex Internal · May 2026 ·
+  Based on Pellegrini API v1.0 PRELIMINARY documentation (16/04/2026), Bible Architectural Analysis, and Architectural Report.
+  All assumptions preliminary — subject to revision once DIT questions are answered. Not for external distribution.
+</div>
+
+</body>
+</html>
