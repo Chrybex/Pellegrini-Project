@@ -578,46 +578,6 @@ scope={API_CLIENT_ID}/.default
 // AttivaCarta, GetSaldo, SpendiBPE, GetMovimentiCarta.
 // Token refresh strategy is undocumented.` }},
 
-  { type:'req', from:'APP', to:'P',
-    label:'POST /matricole',
-    sub:'email + codiceCliente · one-time PomId resolution',
-    p:{ tag:'note', title:'POST /matricole  — one-time call at first login',
-        body:`{
-  "email":         "utente@azienda.it",
-  "codiceCliente": 12345
-  // All filters optional — max 500 results
-}
-
-// Called once immediately after first login.
-// Maps the user (email + codiceCliente from the HR side)
-// to their Pellegrini PomId.
-//
-// PomId is required by SpendiBPE, GetSaldo,
-// GetMovimentiCarta, and AnnullaCodiceSpesa.
-//
-// ⚠ NOT called before each transaction —
-// PomId is cached locally after this first resolution
-// and reused for the entire session (and likely persisted
-// across sessions in Pellegrini's own app).` }},
-
-  { type:'res', from:'P', to:'APP',
-    label:'[{ pomId, nome, email, matricola }]',
-    sub:'PomId cached locally — reused for all subsequent API calls',
-    p:{ tag:'note', title:'/matricole Response  — cached after first call',
-        body:`[{
-  "pomId":         98765,
-  "nome":          "Mario",
-  "cognome":       "Rossi",
-  "codiceFiscale": "RSSMRA80A01H501Z",
-  "email":         "mario.rossi@azienda.it",
-  "matricola":     "MAT001",
-  "codiceCliente": 12345
-}]
-
-// APP stores pomId locally (e.g. in secure storage).
-// This is the bridge between HR-side data (codiceCliente)
-// and user-side identity (PomId) on Pellegrini's servers.` }},
-
 
   { type:'req', from:'APP', to:'P',
     label:'POST /AttivaCarta',
