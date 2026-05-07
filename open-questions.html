@@ -280,13 +280,6 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#161b22;borde
   </div>
 </div>
 
-<div class="q-card">
-  <div class="q-accent ext"></div>
-  <div class="q-body">
-    <div class="q-top"><span class="q-num">Q18</span><span class="tag high">High</span><span class="q-text">Is there a sandbox / staging environment available for integration testing?</span></div>
-    <div class="q-note"><em>No sandbox is mentioned anywhere in the documentation. End-to-end testing without one requires either a mock or a limited live pilot — both with significant operational risk.</em></div>
-  </div>
-</div>
 
 <div class="q-card">
   <div class="q-accent ext"></div>
@@ -451,22 +444,14 @@ code{font-family:'Courier New',monospace;font-size:11px;background:#161b22;borde
 <div class="q-card">
   <div class="q-accent eng"></div>
   <div class="q-body">
-    <div class="q-top"><span class="q-num">Q36</span><span class="tag high">High</span><span class="q-text">Without a Pellegrini sandbox environment, how do we test the integration before going live?</span></div>
-    <div class="q-note"><em>Options to evaluate: request a sandbox from DIT, build a Pellegrini API mock based on the documentation, or negotiate a limited live test with a pilot employer.</em></div>
+    <div class="q-top"><span class="q-num">Q36</span><span class="tag medium">Medium</span><span class="q-text">How do we handle the three undocumented endpoints (<code>TrackingOrdine</code>, <code>TrackingSpedizioni</code>, <code>logBadge</code>) — skip, stub, or block on DIT to provide documentation?</span></div>
   </div>
 </div>
 
 <div class="q-card">
   <div class="q-accent eng"></div>
   <div class="q-body">
-    <div class="q-top"><span class="q-num">Q37</span><span class="tag medium">Medium</span><span class="q-text">How do we handle the three undocumented endpoints (<code>TrackingOrdine</code>, <code>TrackingSpedizioni</code>, <code>logBadge</code>) — skip, stub, or block on DIT to provide documentation?</span></div>
-  </div>
-</div>
-
-<div class="q-card">
-  <div class="q-accent eng"></div>
-  <div class="q-body">
-    <div class="q-top"><span class="q-num">Q38</span><span class="tag medium">Medium</span><span class="q-text">What is our error handling strategy for Pellegrini API failures mid-spend-flow?</span></div>
+    <div class="q-top"><span class="q-num">Q37</span><span class="tag medium">Medium</span><span class="q-text">What is our error handling strategy for Pellegrini API failures mid-spend-flow?</span></div>
     <div class="q-note"><em>e.g. <code>SpendiBPE</code> succeeds but the 120s window expires before POS confirmation — who resolves the inconsistency, and what is the user-facing response?</em></div>
   </div>
 </div>
