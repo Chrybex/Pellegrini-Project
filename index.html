@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>CloverHead — Pellegrini Native App Flow</title>
+<title>Pellegrini Native App Flow</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -222,7 +222,7 @@ header p  { font-size: 12px; color: #8b949e; margin-top: 3px; }
       <div class="actor-box" style="border-color:#f59e0b">
         <span class="actor-icon">🌐</span>
         <div class="actor-name">PELLEGRINI API</div>
-        <div class="actor-sub">CloverHead backend</div>
+        <div class="actor-sub">Pellegrini backend</div>
       </div>
     </div>
     <div class="actor-col">
@@ -474,7 +474,7 @@ Authorization: Bearer {User Token}` }},
 }
 
 // Pellegrini holds the authoritative user BPE balance.
-// The app reads balance directly from CloverHead.` }},
+// The app reads balance directly from Pellegrini.` }},
 
   { type:'res', from:'P', to:'APP',
     label:'{ Saldo, Badge, DettaglioSaldo[] }',
@@ -564,7 +564,7 @@ Authorization: Bearer {User Token}` }},
     sub:'POS validates CodiceSpesa directly with Pellegrini API',
     p:{ tag:'warn', title:'POS → Pellegrini API  ⚠ NOT DOCUMENTED',
         body:`// POS-side validation flow is entirely absent
-// from CloverHead API v1.0 documentation.
+// from Pellegrini API v1.0 documentation.
 
 // Unknown:
 //   - which endpoint the POS terminal calls
@@ -573,7 +573,7 @@ Authorization: Bearer {User Token}` }},
 //   - protocol/authentication used by merchant terminals
 
 // This is the most critical undocumented gap
-// for any integration with CloverHead.` }},
+// for any integration with Pellegrini.` }},
 
   { type:'res', from:'P', to:'POS',
     label:'Vouchers deducted — payment confirmed',
