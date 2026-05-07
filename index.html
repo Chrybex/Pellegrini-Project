@@ -644,31 +644,6 @@ scope={API_CLIENT_ID}/.default
 // ⚠ Both bugs are in the same endpoint section:
 // wrong endpoint name + wrong response message.` }},
 
-  { type:'req', from:'APP', to:'P',
-    label:'GET /badge/{pomId}',
-    sub:'Verify badge assigned to the employee',
-    p:{ tag:'req', title:'GET /badge/{pomId}',
-        body:`GET /badge/98765
-Authorization: Bearer {User Token}` }},
-
-  { type:'res', from:'P', to:'APP',
-    label:'[{ numero, stato, isFullDigital }]',
-    sub:'Badge list · stato: "A" = active',
-    p:{ tag:'res', title:'GET /badge Response',
-        body:`[{
-  "id":                   5001,
-  "numero":               "0012345678",
-  "stato":                "A",
-  "isAssegnato":          true,
-  "isFullDigital":        false,
-  "dataAttivazione":      "2024-01-20T00:00:00",
-  "dataScadenzaBancaria": "2028-12-31T00:00:00"
-}]
-
-// isFullDigital: true = virtual badge, no physical card.
-// This is the native Pellegrini flow: balance is already
-// on their servers, so code generation works natively.` }},
-
 
   // ── PHASE 4: BALANCE CHECK ───────────────────────────────────────────────
   { type:'phase', label:'PHASE 4 — PRE-SPEND: BALANCE CHECK', color:'#d97706' },
